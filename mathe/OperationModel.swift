@@ -63,6 +63,7 @@ public class OperationModel: ObservableObject {
 		operations = []
 		opline = nil
 		correctOperations = 0;
+		answeredOperations = 0
 	}
 
 	func clearStats() {

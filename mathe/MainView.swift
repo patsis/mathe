@@ -287,23 +287,39 @@ struct KeyboardView: View {
 
 struct StartButtonView: View {
 	@EnvironmentObject var operationModel: OperationModel
+	func isAt(_ state: [GameState]) -> Bool {
+		return state.contains(self.operationModel.state)
+	}
 	var body: some View {
 		VStack {
-			if [.start].contains(self.operationModel.state) {
+			if isAt([.start, .finished]) {
+				if isAt([.start]) {
+					Spacer()
+				}
 				Button(action: {
+					self.operationModel.setTotal(total: 20)
 					withAnimation(.easeOut(duration: 0.5)) {
 						self.operationModel.start()
+						self.operationModel.newOperation()
 					}
 				}) {
-					Text("Start")
+					Text(self.isAt([.start]) ? "Start" : "Start New")
 						.font(.system(size: 50))
 						.fontWeight(.light)
 						.kerning(8)
 						.foregroundColor(Color("titleForeColor1"))
 						.shadow(color: .white, radius: 2, x: 0, y: 0)
 				}
+				.padding()
+				.offset(x: 0, y: [.start].contains(self.operationModel.state) ? -100 : 0)
+
+				if isAt([.start]) {
+					Spacer()
+				}
 			}
 		}
+		.animation(.easeIn(duration: 0.2))
+		.transition(.opacity)
 	}
 }
 
@@ -387,12 +403,8 @@ struct GameView: View {
 						} /// ForEach
 					}
 				}
-				.onAppear {
-					self.operationModel.setTotal(total: 20)
-					self.operationModel.newOperation()
-				}
 			} else {
-				Spacer()
+//				Spacer()
 			}
 		}
 		.padding(.top, 10)
@@ -408,14 +420,16 @@ struct MainView: View {
 
 			VStack(alignment: .center, spacing: 0) { /// Main VStack
 				TitleView() /// always showing
+				StartButtonView() /// state ==.start
+
 				GameView() /// state == .playing, .finished
 				KeyboardView() /// state == .playing
 			} /// Main VStack
 
 			SlideUpMenu(buttonSize: 50, height: 250) /// settings menu when .playin, .settings
 
-			StartButtonView() /// state ==.start
 		}
+
 	}
 }
 
